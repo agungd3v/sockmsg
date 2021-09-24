@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^10.0.0",
-    "mongoose": "^6.0.7",
-    "socket.io": "^4.2.0"
+    "socket.io": "^4.2.0",
+    "mongoose": "^5.12.13"
   }
 }
