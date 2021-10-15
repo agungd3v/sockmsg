@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +12,9 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "googleapis": "^88.2.0",
     "socket.io": "^4.2.0",
+    "password-hash": "^1.2.2",
     "mongoose": "^5.12.13"
   }
 }
