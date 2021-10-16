@@ -9,29 +9,47 @@ function bufferToStream(buff) {
   return tmp
 }
 
-const changePhoto = async (data) => {
-  const fileMetadata = {
-    'name': 'test2.webp',
-    'parents': ['1wBj5lrq-ZOCM3lsZyNWuCe965eeik03P']
+const deletePhoto = async (photoid) => {
+  try {
+    await googleDriveService.files.delete({ fileId: photoid })
+    return { status: true }
+  } catch (error) {
+    return { status: false, message: error.message }
   }
-  const media = {
-    mimeType: 'image/webp',
-    body: bufferToStream(data)
-  }
-  const request = await googleDriveService.files.create({
-    resource: fileMetadata,
-    media: media,
-    fields: 'id'
-  })
-
-  return request
 }
 
-const getUser = async (data) => {
-  const request = await googleDriveService.files.get({
-    fileId: "1yNpDjYXAn8SBAOqDePgyn7JOwkXPrgM-"
-  })
-  return request
+const changePhoto = async (data, userid) => {
+  try {
+    const fileMetadata = {
+      'name': `vpr_${userid}`,
+      'parents': ['1wBj5lrq-ZOCM3lsZyNWuCe965eeik03P']
+    }
+    const media = {
+      mimeType: 'image/webp',
+      body: bufferToStream(data)
+    }
+    const request = await googleDriveService.files.create({
+      resource: fileMetadata,
+      media: media,
+      fields: 'id'
+    })
+    return request
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
+}
+
+const updateUserPhoto = async (userid, photoid) => {
+  try {
+    const request = await user.findOneAndUpdate(
+      { _id: userid },
+      { $set: { photo: photoid} },
+      { new: true }
+    )
+    return { status: true, message: request }
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
 }
 
 const searchUser = async (data) => {
@@ -48,4 +66,4 @@ const searchUser = async (data) => {
   }
 }
 
-module.exports = { changePhoto, getUser, searchUser }
+module.exports = { changePhoto, updateUserPhoto, deletePhoto, searchUser }

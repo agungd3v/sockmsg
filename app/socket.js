@@ -1,7 +1,7 @@
 const { Server } = require("socket.io")
 const socket = new Server({ cors: { origin: "*" } })
 
-const { changePhoto, getUser, searchUser } = require('./utils/user')
+const { changePhoto, updateUserPhoto, deletePhoto, searchUser } = require('./utils/user')
 const { getConversation, listConversation, InMessage } = require('./utils/conversation')
 const { register, login } = require("./utils/auth")
 
@@ -18,38 +18,16 @@ const on = (port) => {
       socket.emit("loglogin", signin)
     })
     // User change photo
-    socket.on("changePhoto", payload => {
-      changePhoto(payload).then(data => {
-        socket.emit("rgdrive", {
-          type: 'success',
-          message: data
-        })
-      }).catch(error => {
-        socket.emit("rgdrive", {
-          type: 'error',
-          message: error.message
-        })
-      })
-    })
-    // User get data
-    socket.on("getUser", () => {
-      getUser().then(response => {
-        if (response.status) {
-          socket.emit("rgdrive", {
-            type: "success",
-            message: response.data
-          })
-        } else {
-          socket.emit("rgdrive", {
-            type: "Failed",
-            message: response.statusText
+    socket.on("changePhoto", (payload, user) => {
+      if (user.photo) {
+        deletePhoto(user.photo).then(respx => { if (!respx.status) console.log(respx.message) })
+      }
+      changePhoto(payload, user.id).then(respg => {
+        if (respg.status == 200) {
+          updateUserPhoto(user.id, respg.data.id).then(resp => {
+            socket.emit("photo_changed", resp)
           })
         }
-      }).catch(error => {
-        socket.emit("rgdrive", {
-          type: "error",
-          message: error.message
-        })
       })
     })
     // Search user
