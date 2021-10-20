@@ -54,6 +54,10 @@ const on = (port) => {
       InMessage(ray, msg).then(data => {
         socket.join(ray)
         socket.to(ray).emit("comming_message", data)
+        // Update list for sender
+        socket.emit('update_list_after_send_message', data)
+        // Update list for reciver
+        socket.broadcast.emit('update_list_after_send_message', data)
       })
     })
     // Lists Conversation
