@@ -3,6 +3,7 @@ const socket = new Server({ cors: { origin: "*" } })
 
 const { changePhoto, updateUserPhoto, deletePhoto, searchUser } = require('./utils/user')
 const { getConversation, listConversation, InMessage } = require('./utils/conversation')
+const { createGroup } = require('./utils/gconversation')
 const { register, login } = require("./utils/auth")
 
 const on = (port) => {
@@ -17,6 +18,8 @@ const on = (port) => {
       const signin = await login(payload)
       socket.emit("loglogin", signin)
     })
+
+    // Start single conversation socket
     // User change photo
     socket.on("changePhoto", (payload, user) => {
       if (user.photo) {
@@ -66,6 +69,16 @@ const on = (port) => {
         socket.emit("lists_comming", data)
       })
     })
+    // End single conversation socket
+
+    // Start group conversation socket
+    // Create group
+    socket.on("makegroup", (info, userid) => {
+      createGroup(info, userid).then(dtx => {
+        socket.emit("groupcreated", dtx.message)
+      })
+    })
+    // End group conversation socket
   });
   socket.listen(port)
 }
