@@ -1,4 +1,5 @@
 const conversation = require("../models/conversations")
+const gconversation = require("../models/gconversations")
 
 const getConversation = async (from, to) => {
   try {
@@ -24,7 +25,14 @@ const listConversation = async (from) => {
         messages: { $exists: true }
       }
     ).populate('is_user').populate('messages.is_user')
-    return { status: true, message: request }
+    const request2 = await gconversation.find(
+      { $or: [
+          { is_user: { $in: [from] } },
+          { is_admin: { $in: [from] } }
+        ]
+      }
+    ).populate('is_user').populate('is_admin').populate('messages.is_user')
+    return { status: true, message: { single: request, group: request2 } }
   } catch (error) {
     return { status: false, message: error.message }
   }

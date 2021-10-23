@@ -3,7 +3,7 @@ const socket = new Server({ cors: { origin: "*" } })
 
 const { changePhoto, updateUserPhoto, deletePhoto, searchUser } = require('./utils/user')
 const { getConversation, listConversation, InMessage } = require('./utils/conversation')
-const { createGroup } = require('./utils/gconversation')
+const { createGroup, getGconversation, InGmessage } = require('./utils/gconversation')
 const { register, login } = require("./utils/auth")
 
 const on = (port) => {
@@ -44,7 +44,7 @@ const on = (port) => {
     // Get Conversations
     socket.on('conversation', value => {
       getConversation(value.from, value.to).then(data => {
-        socket.emit("start_conversation", data)
+        socket.emit("start_conversation", data, 'single')
       })
     })
     // Join Conversations
@@ -56,11 +56,11 @@ const on = (port) => {
     socket.on("in_message", (ray, msg) => {
       InMessage(ray, msg).then(data => {
         socket.join(ray)
-        socket.to(ray).emit("comming_message", data)
+        socket.to(ray).emit("comming_message", data, 'single')
         // Update list for sender
-        socket.emit('update_list_after_send_message', data)
+        socket.emit('update_list_after_send_message', data, 'single')
         // Update list for reciver
-        socket.broadcast.emit('update_list_after_send_message', data)
+        socket.broadcast.emit('update_list_after_send_message', data, 'single')
       })
     })
     // Lists Conversation
@@ -76,6 +76,25 @@ const on = (port) => {
     socket.on("makegroup", (info, userid) => {
       createGroup(info, userid).then(dtx => {
         socket.emit("groupcreated", dtx.message)
+      })
+    })
+    socket.on("gconversation", rayid => {
+      getGconversation(rayid).then(resp => {
+        socket.emit("start_conversation", resp, 'group')
+      })
+    })
+    socket.on("join_gconversation", (rayData) => {
+      socket.join(rayData._id)
+      socket.to(rayData._id).emit("start_gmessage", rayData)
+    })
+    socket.on("in_gmessage", (ray, msg) => {
+      InGmessage(ray, msg).then(data => {
+        socket.join(ray)
+        socket.to(ray).emit("comming_message", data, 'group')
+        // Update list for sender
+        socket.emit('update_list_after_send_message', data, 'group')
+        // Update list for reciver
+        socket.broadcast.emit('update_list_after_send_message', data, 'group')
       })
     })
     // End group conversation socket

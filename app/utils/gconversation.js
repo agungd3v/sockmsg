@@ -14,4 +14,28 @@ const createGroup = async (data, userId) => {
   }
 }
 
-module.exports = { createGroup }
+const getGconversation = async gid => {
+  try {
+    const request = await gconversation.findOne({
+      _id: gid
+    }).populate('is_admin').populate('is_user').populate('messages.is_user')
+    return { status: true, message: request }
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
+}
+
+const InGmessage = async (rayId, data) => {
+  try {
+    const request = await gconversation.findOneAndUpdate(
+      { _id: rayId },
+      { $push: { messages: data } },
+      { new: true }
+    ).populate('is_admin').populate('is_user').populate('messages.is_user')
+    return { status: true, message: request }
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
+}
+
+module.exports = { createGroup, getGconversation, InGmessage }
