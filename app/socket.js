@@ -36,9 +36,12 @@ const on = (port) => {
     // Search user
     socket.on('search', value => {
       searchUser(value.keyword).then(data => {
-        socket.emit("resultsearch", data)
-      }).catch(err => {
-        console.log(err)
+        if (data.status) {
+          let dtx = []
+          if (data.message.user.length > 0) data.message.user.forEach(dmk => dtx.push(dmk))
+          if (data.message.group.length > 0) data.message.group.forEach(dmk => dtx.push(dmk))
+          socket.emit("resultsearch", dtx)
+        }
       })
     })
     // Get Conversations

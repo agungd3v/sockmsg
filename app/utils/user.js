@@ -1,4 +1,5 @@
 const user = require('../models/user')
+const group = require('../models/gconversations')
 const { Duplex } = require('stream')
 const { googleDriveService } = require('../config/asset')
 
@@ -57,7 +58,10 @@ const searchUser = async (data) => {
     const request = await user.find({ fullname: {
       "$regex": `.*${data}`, "$options": "i"
     }})
-    return { status: true, message: request }
+    const request2 = await group.find({ title: {
+      "$regex": `.*${data}`, "$options": "i"
+    }})
+    return { status: true, message: { user: request, group: request2 } }
   } catch (error) {
     return {
       status: false,
