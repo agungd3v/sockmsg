@@ -14,10 +14,27 @@ const createGroup = async (data, userId) => {
   }
 }
 
-const getGconversation = async gid => {
+const joinGroup = async (group, user) => {
+  try {
+    const request = await gconversation.findOneAndUpdate(
+      { _id: group },
+      { $push: { is_user: user } },
+      { new: true }
+    ).populate('is_admin').populate('is_user').populate('messages.is_user')
+    return { status: true, message: request }
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
+}
+
+const getGconversation = async (gid, usrid) => {
   try {
     const request = await gconversation.findOne({
-      _id: gid
+      _id: gid,
+      $or: [
+        { is_admin: { $in: [usrid] } },
+        { is_user: { $in: [usrid] } }
+      ]
     }).populate('is_admin').populate('is_user').populate('messages.is_user')
     return { status: true, message: request }
   } catch (error) {
@@ -38,4 +55,4 @@ const InGmessage = async (rayId, data) => {
   }
 }
 
-module.exports = { createGroup, getGconversation, InGmessage }
+module.exports = { createGroup, joinGroup, getGconversation, InGmessage }
