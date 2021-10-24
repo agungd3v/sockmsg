@@ -3,7 +3,7 @@ const socket = new Server({ cors: { origin: "*" } })
 
 const { changePhoto, updateUserPhoto, deletePhoto, searchUser } = require('./utils/user')
 const { getConversation, listConversation, InMessage } = require('./utils/conversation')
-const { createGroup, joinGroup, getGconversation, InGmessage } = require('./utils/gconversation')
+const { createGroup, joinGroup, changeGroupTitle, getGconversation, InGmessage } = require('./utils/gconversation')
 const { register, login } = require("./utils/auth")
 
 const on = (port) => {
@@ -84,6 +84,15 @@ const on = (port) => {
     socket.on("joingroup", (group, user) => {
       joinGroup(group, user).then(data => {
         socket.emit("start_conversation", data, 'group')
+      })
+    })
+    socket.on("changegrouptitle", (gid, nwt) => {
+      changeGroupTitle(gid, nwt).then(dtx => {
+        socket.emit("start_conversation", dtx, 'group')
+        // Update list for sender
+        socket.emit('update_list_after_send_message', dtx, 'group')
+        // Update list for reciver
+        socket.broadcast.emit('update_list_after_send_message', dtx, 'group')
       })
     })
     socket.on("gconversation", (rayid, userid) => {

@@ -27,6 +27,19 @@ const joinGroup = async (group, user) => {
   }
 }
 
+const changeGroupTitle = async (groupid, newtitle) => {
+  try {
+    const request = await gconversation.findOneAndUpdate(
+      { _id: groupid },
+      { $set: { title: newtitle } },
+      { new: true }
+    ).populate('is_admin').populate('is_user').populate('messages.is_user')
+    return { status: true, message: request }
+  } catch (error) {
+    return { status: false, message: error.message }
+  }
+}
+
 const getGconversation = async (gid, usrid) => {
   try {
     const request = await gconversation.findOne({
@@ -55,4 +68,4 @@ const InGmessage = async (rayId, data) => {
   }
 }
 
-module.exports = { createGroup, joinGroup, getGconversation, InGmessage }
+module.exports = { createGroup, joinGroup, changeGroupTitle, getGconversation, InGmessage }
